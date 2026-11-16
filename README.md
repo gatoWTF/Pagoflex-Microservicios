@@ -2,25 +2,33 @@
 
 Servicios Spring Boot 4.1 (Java 21, Maven, JPA, MySQL) que consume la app con Retrofit.
 
+La app Android (Kotlin + Jetpack Compose) está en otro repositorio: [gatoWTF/PagoFlex](https://github.com/gatoWTF/PagoFlex). No comparten código: la app solo conoce la dirección y el puerto de cada servicio, y cada servicio se conecta solo a su propia base en MySQL.
+
 | Servicio | Puerto | Base de datos | Responsabilidad |
 |---|---|---|---|
 | `roles-service` | 8081 | `pagoflex_roles` | Catálogo de roles |
 | `usuarios-service` | 8082 | `pagoflex_usuarios` | Registro, login, perfil y cambio de contraseña (BCrypt). Le pide el nombre del rol a `roles-service` con WebClient |
 | `compromisos-service` | 8083 | `pagoflex_compromisos` | Compromisos de pago, comprobantes y reportes de problemas. Cada compromiso guarda el RUT de su dueño (el mismo de su cuenta) |
 
-## Cómo levantarlos (desde Android Studio)
+## Cómo levantarlos
 
 1. Iniciar MySQL en Laragon (puerto 3306, usuario `root` sin contraseña). Las bases se crean solas.
-2. En Android Studio, pestaña **Terminal** (PowerShell), desde la carpeta del proyecto, encender los 3 con un solo comando:
+2. Encender cada servicio en su propia ventana. Desde la carpeta de este repositorio (en el Explorador de Windows: clic derecho en la carpeta → **Abrir en Terminal**), un comando por ventana:
    ```powershell
-   Get-ChildItem .\microservicios\iniciar-*.bat | ForEach-Object { Start-Process $_.FullName }
+   .\iniciar-roles.bat
    ```
-   Se abre una ventana por servicio. También se puede encender uno solo, por ejemplo `.\microservicios\iniciar-usuarios.bat`.
+   ```powershell
+   .\iniciar-usuarios.bat
+   ```
+   ```powershell
+   .\iniciar-compromisos.bat
+   ```
+   También se puede hacer doble clic en cada archivo `.bat`. Cada servicio está listo cuando su ventana muestra `Started ...Application`.
 3. Para detenerlos: cerrar sus ventanas (o `Ctrl+C` en cada una y responder `S`).
 
 Los scripts usan el Java que trae Android Studio y el Maven Wrapper (`mvnw`) de cada servicio, así que no hace falta instalar Maven ni usar IntelliJ. La primera vez descargan Maven y las librerías (tarda unos minutos).
 
-La app (emulador) llega al PC por `http://10.0.2.2:8082/`.
+La app (emulador) llega al PC por `http://10.0.2.2:8082/` (usuarios) y `http://10.0.2.2:8083/` (compromisos). La dirección y el usuario de MySQL de cada servicio están en su `src/main/resources/application.properties`.
 
 ## Contrato de roles-service (los ids importan)
 
