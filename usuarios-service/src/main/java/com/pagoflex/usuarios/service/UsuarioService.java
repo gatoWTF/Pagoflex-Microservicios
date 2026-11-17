@@ -8,6 +8,7 @@ import com.pagoflex.usuarios.dto.ContactoRequest;
 import com.pagoflex.usuarios.dto.LoginRequest;
 import com.pagoflex.usuarios.dto.RegistroRequest;
 import com.pagoflex.usuarios.dto.RolDto;
+import com.pagoflex.usuarios.dto.TitularResponse;
 import com.pagoflex.usuarios.dto.UsuarioResponse;
 import com.pagoflex.usuarios.model.RolId;
 import com.pagoflex.usuarios.model.Usuario;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -37,6 +39,15 @@ public class UsuarioService {
         return aRespuesta(buscar(id));
     }
 
+    public TitularResponse buscarTitular(String rut) {
+        if (vacio(rut)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Indica el RUT");
+        }
+        return buscarPorRut(rut)
+                .map(usuario -> new TitularResponse(usuario.getRut(), usuario.getNombre()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay una cuenta con este RUT"));
+    }
+
     public UsuarioResponse registrar(RegistroRequest datos) {
         if (vacio(datos.nombre()) || vacio(datos.rut()) || vacio(datos.correo())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombre, RUT y correo son obligatorios");
@@ -48,7 +59,7 @@ public class UsuarioService {
         if (usuarioRepository.existsByCorreo(correo)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuenta con este correo");
         }
-        if (usuarioRepository.existsByRut(rut)) {
+        if (buscarPorRut(rut).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuenta con este RUT");
         }
         validarRol(RolId.USUARIO_FINAL);
@@ -84,7 +95,7 @@ public class UsuarioService {
         if (usuarioRepository.existsByCorreoAndIdNot(correo, id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuenta con este correo");
         }
-        if (usuarioRepository.existsByRutAndIdNot(rut, id)) {
+        if (buscarPorRut(rut).filter(otro -> !otro.getId().equals(id)).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuenta con este RUT");
         }
 
@@ -173,6 +184,17 @@ public class UsuarioService {
 
     private String limpiarCorreo(String correo) {
         return correo.trim().toLowerCase();
+    }
+
+    private Optional<Usuario> buscarPorRut(String rut) {
+        String buscado = claveRut(rut);
+        return usuarioRepository.findAll().stream()
+                .filter(usuario -> claveRut(usuario.getRut()).equals(buscado))
+                .findFirst();
+    }
+
+    private String claveRut(String rut) {
+        return rut == null ? "" : rut.replace(".", "").replace("-", "").trim().toUpperCase();
     }
 
     private boolean vacio(String texto) {

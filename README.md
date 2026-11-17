@@ -47,6 +47,7 @@ Endpoints: `GET /api/roles` y `GET /api/roles/{id}` (404 si no existe).
 | Método | Ruta | Cuerpo | Respuesta |
 |---|---|---|---|
 | GET | `/api/usuarios/{id}` | — | 200 usuario · 404 |
+| GET | `/api/usuarios/titular?rut=...` | — | 200 `{"rut","nombre"}` de la cuenta con ese RUT · 404 sin cuenta · 400 sin RUT |
 | POST | `/api/usuarios` | `{"nombre","rut","correo","contrasena"}` | 201 · 400 datos o clave débil · 409 correo o RUT repetido |
 | POST | `/api/usuarios/login` | `{"correo","contrasena"}` | 200 usuario · 401 credenciales incorrectas |
 | PUT | `/api/usuarios/{id}` | `{"nombre","rut","correo"}` | 200 · 404 · 409 |
@@ -109,6 +110,8 @@ Endpoints: `GET /api/roles` y `GET /api/roles/{id}` (404 si no existe).
 
 - La contraseña se guarda con **BCrypt** (nunca en texto plano) y la respuesta nunca la incluye.
 - Toda cuenta creada desde la app queda como usuario final (rol 1).
+- El RUT se compara sin puntos ni guion: `15.834.207-3` y `15834207-3` son la misma persona, así que no se puede crear una segunda cuenta con el mismo RUT escrito de otra forma.
+- `GET /api/usuarios/titular` lo usa la app del ejecutivo: al escribir el RUT del deudor, completa su nombre con el de su cuenta (si la tiene).
 - El correo secundario y el teléfono del Perfil se guardan en la cuenta (columnas `correo_secundario` y `telefono`, que JPA agrega sola con `ddl-auto=update`), así no se pierden al cerrar sesión. La foto de perfil queda en el teléfono, un archivo por RUT.
 - Al iniciar por primera vez se cargan las personas de la semilla de la app (usuarios finales, ejecutivos y agentes). Su contraseña inicial está en `DatosIniciales.java` (`CONTRASENA_INICIAL`).
 - En Spring Boot 4 la propiedad para que el error traiga `"message"` es `spring.web.error.include-message=always` (la antigua `server.error.include-message` ya no funciona).

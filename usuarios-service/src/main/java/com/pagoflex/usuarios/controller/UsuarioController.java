@@ -5,6 +5,7 @@ import com.pagoflex.usuarios.dto.CambiarContrasenaRequest;
 import com.pagoflex.usuarios.dto.ContactoRequest;
 import com.pagoflex.usuarios.dto.LoginRequest;
 import com.pagoflex.usuarios.dto.RegistroRequest;
+import com.pagoflex.usuarios.dto.TitularResponse;
 import com.pagoflex.usuarios.dto.UsuarioResponse;
 import com.pagoflex.usuarios.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +30,11 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public UsuarioResponse obtener(@PathVariable Long id) {
         return usuarioService.obtener(id);
+    }
+
+    @GetMapping("/titular")
+    public TitularResponse buscarTitular(@RequestParam String rut) {
+        return usuarioService.buscarTitular(rut);
     }
 
     @PostMapping
