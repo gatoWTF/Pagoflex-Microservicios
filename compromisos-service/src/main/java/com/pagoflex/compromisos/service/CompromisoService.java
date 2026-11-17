@@ -16,6 +16,7 @@ import com.pagoflex.compromisos.model.MotivoAnulacion;
 import com.pagoflex.compromisos.model.Rut;
 import com.pagoflex.compromisos.repository.ComprobanteRepository;
 import com.pagoflex.compromisos.repository.CompromisoRepository;
+import com.pagoflex.compromisos.repository.EmpresaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class CompromisoService {
 
     private final CompromisoRepository compromisoRepository;
     private final ComprobanteRepository comprobanteRepository;
+    private final EmpresaRepository empresaRepository;
     private final VencimientoService vencimientoService;
 
     public List<CompromisoResponse> listarPorUsuario(String rut) {
@@ -63,6 +65,12 @@ public class CompromisoService {
         if (vacio(datos.rutUsuario()) || vacio(datos.nombreUsuario()) || vacio(datos.empresaCodigo())
                 || vacio(datos.concepto()) || vacio(datos.registradoPor())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RUT, nombre, empresa, concepto y ejecutivo son obligatorios");
+        }
+        if (!Rut.valido(datos.rutUsuario())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El RUT del deudor no es válido");
+        }
+        if (!empresaRepository.existsById(datos.empresaCodigo().trim())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La empresa indicada no existe");
         }
         Integer total = datos.totalCuotas();
         if (total == null || total < 1 || total > MAXIMO_CUOTAS) {

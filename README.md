@@ -48,9 +48,9 @@ Endpoints: `GET /api/roles` y `GET /api/roles/{id}` (404 si no existe).
 |---|---|---|---|
 | GET | `/api/usuarios/{id}` | — | 200 usuario · 404 |
 | GET | `/api/usuarios/titular?rut=...` | — | 200 `{"rut","nombre"}` de la cuenta con ese RUT · 404 sin cuenta · 400 sin RUT |
-| POST | `/api/usuarios` | `{"nombre","rut","correo","contrasena"}` | 201 · 400 datos o clave débil · 409 correo o RUT repetido |
+| POST | `/api/usuarios` | `{"nombre","rut","correo","contrasena"}` | 201 · 400 nombre con números, RUT que no cumple el módulo 11, correo sin formato o clave débil · 409 correo o RUT repetido |
 | POST | `/api/usuarios/login` | `{"correo","contrasena"}` | 200 usuario · 401 credenciales incorrectas |
-| PUT | `/api/usuarios/{id}` | `{"nombre","rut","correo"}` | 200 · 404 · 409 |
+| PUT | `/api/usuarios/{id}` | `{"nombre","rut","correo"}` | 200 · 400 nombre con números, correo sin formato o RUT distinto al de la cuenta (el RUT no se cambia) · 404 · 409 correo de otra cuenta |
 | PUT | `/api/usuarios/{id}/contacto` | `{"correoSecundario","telefono"}` (ambos opcionales; vacío = borrar) | 200 usuario · 400 correo o teléfono no válido · 404 |
 | PUT | `/api/usuarios/{id}/contrasena` | `{"actual","nueva"}` | 204 · 401 clave actual incorrecta · 400 |
 
@@ -61,7 +61,7 @@ Endpoints: `GET /api/roles` y `GET /api/roles/{id}` (404 si no existe).
 | GET | `/api/compromisos?rut=...` | — | Compromisos del usuario (el RUT puede ir con o sin puntos) |
 | GET | `/api/compromisos?empresa=EC-03` | — | Compromisos de una empresa |
 | GET | `/api/compromisos/{folio}` | — | 200 · 404 |
-| POST | `/api/compromisos` | `{"rutUsuario","nombreUsuario","empresaCodigo","concepto","totalCuotas","cuotaInicial","monto","fechaVencimiento","registradoPor"}` | 201 con la cuota inicial creada · 400 datos o fecha anterior a hoy · 409 cuota ya registrada |
+| POST | `/api/compromisos` | `{"rutUsuario","nombreUsuario","empresaCodigo","concepto","totalCuotas","cuotaInicial","monto","fechaVencimiento","registradoPor"}` | 201 con la cuota inicial creada · 400 datos, RUT que no cumple el módulo 11, empresa que no existe o fecha anterior a hoy · 409 cuota ya registrada |
 | PUT | `/api/compromisos/{folio}/estado` | `{"estado"}` (`EN_REVISION`, `PENDIENTE` o `VENCIDO`) | 200 · 400 si se pide `ANULADO` o `PAGADO` · 409 si el cambio no está permitido |
 | PUT | `/api/compromisos/{folio}/anular` | `{"motivo","comentario","ejecutivoCodigo","empresaCodigo"}` | 200 · 400 sin motivo, u `OTRO` sin comentario · 403 otra empresa · 409 pagado o ya anulado |
 | POST | `/api/compromisos/{folio}/pagar` | `{"canal","medioPago"}` (opcional) | 201 `{"comprobante", "siguienteCuota"}` · 409 si no se puede pagar |

@@ -11,6 +11,7 @@ import com.pagoflex.usuarios.dto.RolDto;
 import com.pagoflex.usuarios.dto.TitularResponse;
 import com.pagoflex.usuarios.dto.UsuarioResponse;
 import com.pagoflex.usuarios.model.RolId;
+import com.pagoflex.usuarios.model.Rut;
 import com.pagoflex.usuarios.model.Usuario;
 import com.pagoflex.usuarios.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,10 @@ public class UsuarioService {
         if (vacio(datos.nombre()) || vacio(datos.rut()) || vacio(datos.correo())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombre, RUT y correo son obligatorios");
         }
+        validarNombreYCorreo(datos.nombre(), datos.correo());
+        if (!Rut.valido(datos.rut())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RUT no válido");
+        }
         validarContrasena(datos.contrasena());
 
         String correo = limpiarCorreo(datos.correo());
@@ -90,17 +95,16 @@ public class UsuarioService {
         if (vacio(datos.nombre()) || vacio(datos.rut()) || vacio(datos.correo())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombre, RUT y correo son obligatorios");
         }
+        validarNombreYCorreo(datos.nombre(), datos.correo());
+        if (!Rut.clave(datos.rut()).equals(Rut.clave(usuario.getRut()))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El RUT no se puede cambiar");
+        }
         String correo = limpiarCorreo(datos.correo());
-        String rut = datos.rut().trim().toUpperCase();
         if (usuarioRepository.existsByCorreoAndIdNot(correo, id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuenta con este correo");
         }
-        if (buscarPorRut(rut).filter(otro -> !otro.getId().equals(id)).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuenta con este RUT");
-        }
 
         usuario.setNombre(datos.nombre().trim());
-        usuario.setRut(rut);
         usuario.setCorreo(correo);
         Usuario guardado = usuarioRepository.save(usuario);
         compromisoClient.actualizarNombreTitular(guardado.getRut(), guardado.getNombre());
@@ -142,6 +146,15 @@ public class UsuarioService {
     private Usuario buscar(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+    }
+
+    private void validarNombreYCorreo(String nombre, String correo) {
+        if (!nombre.trim().chars().allMatch(c -> Character.isLetter(c) || Character.isWhitespace(c))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre no puede llevar números");
+        }
+        if (!PATRON_CORREO.matcher(limpiarCorreo(correo)).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Correo no válido");
+        }
     }
 
     private void validarContrasena(String contrasena) {
@@ -187,14 +200,10 @@ public class UsuarioService {
     }
 
     private Optional<Usuario> buscarPorRut(String rut) {
-        String buscado = claveRut(rut);
+        String buscado = Rut.clave(rut);
         return usuarioRepository.findAll().stream()
-                .filter(usuario -> claveRut(usuario.getRut()).equals(buscado))
+                .filter(usuario -> Rut.clave(usuario.getRut()).equals(buscado))
                 .findFirst();
-    }
-
-    private String claveRut(String rut) {
-        return rut == null ? "" : rut.replace(".", "").replace("-", "").trim().toUpperCase();
     }
 
     private boolean vacio(String texto) {
