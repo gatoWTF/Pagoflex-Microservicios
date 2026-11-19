@@ -13,20 +13,11 @@ La app Android (Kotlin + Jetpack Compose) está en otro repositorio: [gatoWTF/Pa
 ## Cómo levantarlos
 
 1. Iniciar MySQL en Laragon (puerto 3306, usuario `root` sin contraseña). Las bases se crean solas.
-2. Encender cada servicio en su propia ventana. Desde la carpeta de este repositorio (en el Explorador de Windows: clic derecho en la carpeta → **Abrir en Terminal**), un comando por ventana:
-   ```powershell
-   .\iniciar-roles.bat
-   ```
-   ```powershell
-   .\iniciar-usuarios.bat
-   ```
-   ```powershell
-   .\iniciar-compromisos.bat
-   ```
-   También se puede hacer doble clic en cada archivo `.bat`. Cada servicio está listo cuando su ventana muestra `Started ...Application`.
+2. Doble clic en `encender-todo.bat` (en la carpeta de este repositorio). Abre una ventana por servicio. Cada servicio está listo cuando su ventana muestra `Started ...Application`. Si uno falla, su ventana queda abierta con el error.
+   Para encender uno solo: doble clic en `iniciar-roles.bat`, `iniciar-usuarios.bat` o `iniciar-compromisos.bat`.
 3. Para detenerlos: cerrar sus ventanas (o `Ctrl+C` en cada una y responder `S`).
 
-Los scripts usan el Java que trae Android Studio y el Maven Wrapper (`mvnw`) de cada servicio, así que no hace falta instalar Maven ni usar IntelliJ. La primera vez descargan Maven y las librerías (tarda unos minutos).
+Los scripts usan siempre el Java que trae Android Studio (aunque el PC tenga otro Java configurado) y el Maven Wrapper (`mvnw`) de cada servicio, así que no hace falta instalar Maven ni usar IntelliJ. La primera vez descargan Maven y las librerías (tarda unos minutos).
 
 La app (emulador) llega al PC por `http://10.0.2.2:8082/` (usuarios) y `http://10.0.2.2:8083/` (compromisos). La dirección y el usuario de MySQL de cada servicio están en su `src/main/resources/application.properties`.
 
