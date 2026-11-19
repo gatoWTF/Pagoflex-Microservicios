@@ -1,0 +1,62 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "roles-service",
+            "type": "shell",
+            "command": ".\\iniciar-roles.bat",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/d", "/c"]
+                }
+            },
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "usuarios-service",
+            "type": "shell",
+            "command": ".\\iniciar-usuarios.bat",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/d", "/c"]
+                }
+            },
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "compromisos-service",
+            "type": "shell",
+            "command": ".\\iniciar-compromisos.bat",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/d", "/c"]
+                }
+            },
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

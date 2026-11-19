@@ -17,6 +17,8 @@ La app Android (Kotlin + Jetpack Compose) está en otro repositorio: [gatoWTF/Pa
    Para encender uno solo: doble clic en `iniciar-roles.bat`, `iniciar-usuarios.bat` o `iniciar-compromisos.bat`.
 3. Para detenerlos: cerrar sus ventanas (o `Ctrl+C` en cada una y responder `S`).
 
+Con VS Code: clonar o abrir la carpeta de este repositorio. La primera vez VS Code pregunta si confías en la carpeta y si permites las tareas automáticas: aceptar ambas. Los 3 servicios se encienden solos, cada uno en su propia terminal de VS Code (`.vscode/tasks.json`). Si se rechazó el aviso: menú **Terminal → Ejecutar tarea** y elegir cada servicio.
+
 Los scripts usan siempre el Java que trae Android Studio (aunque el PC tenga otro Java configurado) y el Maven Wrapper (`mvnw`) de cada servicio, así que no hace falta instalar Maven ni usar IntelliJ. La primera vez descargan Maven y las librerías (tarda unos minutos).
 
 La app (emulador) llega al PC por `http://10.0.2.2:8082/` (usuarios) y `http://10.0.2.2:8083/` (compromisos). La dirección y el usuario de MySQL de cada servicio están en su `src/main/resources/application.properties`.
