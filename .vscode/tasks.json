@@ -2,6 +2,25 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "eureka-server",
+            "type": "shell",
+            "command": ".\\iniciar-eureka.bat",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/d", "/c"]
+                }
+            },
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "roles-service",
             "type": "shell",
             "command": ".\\iniciar-roles.bat",
@@ -43,6 +62,25 @@
             "label": "compromisos-service",
             "type": "shell",
             "command": ".\\iniciar-compromisos.bat",
+            "options": {
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/d", "/c"]
+                }
+            },
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "api-gateway",
+            "type": "shell",
+            "command": ".\\iniciar-gateway.bat",
             "options": {
                 "shell": {
                     "executable": "cmd.exe",

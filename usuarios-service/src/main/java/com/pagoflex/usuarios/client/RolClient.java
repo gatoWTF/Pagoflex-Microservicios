@@ -15,8 +15,8 @@ public class RolClient {
 
     private final WebClient webClient;
 
-    public RolClient(@Value("${roles.service.url}") String rolesUrl) {
-        this.webClient = WebClient.builder().baseUrl(rolesUrl).build();
+    public RolClient(WebClient.Builder webClientBuilder, @Value("${roles.service.url}") String rolesUrl) {
+        this.webClient = webClientBuilder.clone().baseUrl(rolesUrl).build();
     }
 
     public RolDto obtener(Long id) {
@@ -27,7 +27,7 @@ public class RolClient {
                     .bodyToMono(RolDto.class)
                     .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
                     .block();
-        } catch (WebClientRequestException e) {
+        } catch (WebClientRequestException | WebClientResponseException.ServiceUnavailable e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "El servicio de roles no está disponible");
         }
     }

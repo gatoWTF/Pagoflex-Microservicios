@@ -1,27 +1,29 @@
 # PagoFlex — Microservicios
 
-Servicios Spring Boot 4.1 (Java 21, Maven, JPA, MySQL) que consume la app con Retrofit.
+Servicios Spring Boot 4.1 (Java 21, Maven, JPA, MySQL) con Spring Cloud 2025.1 (Eureka y Gateway) que consume la app con Retrofit.
 
-La app Android (Kotlin + Jetpack Compose) está en otro repositorio: [gatoWTF/PagoFlex](https://github.com/gatoWTF/PagoFlex). No comparten código: la app solo conoce la dirección y el puerto de cada servicio, y cada servicio se conecta solo a su propia base en MySQL.
+La app Android (Kotlin + Jetpack Compose) está en otro repositorio: [gatoWTF/PagoFlex](https://github.com/gatoWTF/PagoFlex). No comparten código: la app solo conoce la dirección del API Gateway (puerto 8080), y cada servicio se conecta solo a su propia base en MySQL.
 
 | Servicio | Puerto | Base de datos | Responsabilidad |
 |---|---|---|---|
+| `eureka-server` | 8761 | — | Registro y descubrimiento: cada servicio se anota al arrancar. Panel en `http://localhost:8761` |
+| `api-gateway` | 8080 | — | Puerta de entrada de la app. Envía `/api/usuarios/**` a usuarios, `/api/roles/**` a roles y `/api/compromisos/**`, `/api/comprobantes/**`, `/api/reportes/**` a compromisos, buscando cada servicio en Eureka |
 | `roles-service` | 8081 | `pagoflex_roles` | Catálogo de roles |
-| `usuarios-service` | 8082 | `pagoflex_usuarios` | Registro, login, perfil y cambio de contraseña (BCrypt). Le pide el nombre del rol a `roles-service` con WebClient |
+| `usuarios-service` | 8082 | `pagoflex_usuarios` | Registro, login, perfil y cambio de contraseña (BCrypt). Le pide el nombre del rol a `roles-service` con WebClient (por su nombre en Eureka) |
 | `compromisos-service` | 8083 | `pagoflex_compromisos` | Compromisos de pago, comprobantes y reportes de problemas. Cada compromiso guarda el RUT de su dueño (el mismo de su cuenta) |
 
 ## Cómo levantarlos
 
 1. Iniciar MySQL en Laragon (puerto 3306, usuario `root` sin contraseña). Las bases se crean solas.
-2. Doble clic en `encender-todo.bat` (en la carpeta de este repositorio). Abre una ventana por servicio. Cada servicio está listo cuando su ventana muestra `Started ...Application`. Si uno falla, su ventana queda abierta con el error.
-   Para encender uno solo: doble clic en `iniciar-roles.bat`, `iniciar-usuarios.bat` o `iniciar-compromisos.bat`.
+2. Doble clic en `encender-todo.bat` (en la carpeta de este repositorio). Enciende Eureka, espera 20 segundos y abre una ventana por servicio (al final el API Gateway). Cada servicio está listo cuando su ventana muestra `Started ...Application`. Si uno falla, su ventana queda abierta con el error.
+   Para encender uno solo: doble clic en su `iniciar-....bat` (`iniciar-eureka`, `iniciar-roles`, `iniciar-usuarios`, `iniciar-compromisos` o `iniciar-gateway`).
 3. Para detenerlos: cerrar sus ventanas (o `Ctrl+C` en cada una y responder `S`).
 
-Con VS Code: clonar o abrir la carpeta de este repositorio. La primera vez VS Code pregunta si confías en la carpeta y si permites las tareas automáticas: aceptar ambas. Los 3 servicios se encienden solos, cada uno en su propia terminal de VS Code (`.vscode/tasks.json`). Si se rechazó el aviso: menú **Terminal → Ejecutar tarea** y elegir cada servicio.
+Con VS Code: clonar o abrir la carpeta de este repositorio. La primera vez VS Code pregunta si confías en la carpeta y si permites las tareas automáticas: aceptar ambas. Eureka, los 3 servicios y el API Gateway se encienden solos, cada uno en su propia terminal de VS Code (`.vscode/tasks.json`). Si se rechazó el aviso: menú **Terminal → Ejecutar tarea** y elegir cada servicio.
 
 Los scripts usan siempre el Java que trae Android Studio (aunque el PC tenga otro Java configurado) y el Maven Wrapper (`mvnw`) de cada servicio, así que no hace falta instalar Maven ni usar IntelliJ. La primera vez descargan Maven y las librerías (tarda unos minutos).
 
-La app (emulador) llega al PC por `http://10.0.2.2:8082/` (usuarios) y `http://10.0.2.2:8083/` (compromisos). La dirección y el usuario de MySQL de cada servicio están en su `src/main/resources/application.properties`.
+La app (emulador) llega a todos los servicios por el API Gateway en `http://10.0.2.2:8080/`. La dirección y el usuario de MySQL de cada servicio están en su `src/main/resources/application.properties`.
 
 ## Contrato de roles-service (los ids importan)
 

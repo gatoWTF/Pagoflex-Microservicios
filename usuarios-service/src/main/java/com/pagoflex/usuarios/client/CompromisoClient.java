@@ -13,8 +13,8 @@ public class CompromisoClient {
 
     private final WebClient webClient;
 
-    public CompromisoClient(@Value("${compromisos.service.url}") String compromisosUrl) {
-        this.webClient = WebClient.builder().baseUrl(compromisosUrl).build();
+    public CompromisoClient(WebClient.Builder webClientBuilder, @Value("${compromisos.service.url}") String compromisosUrl) {
+        this.webClient = webClientBuilder.clone().baseUrl(compromisosUrl).build();
     }
 
     public void actualizarNombreTitular(String rut, String nombre) {
