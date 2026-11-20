@@ -143,6 +143,19 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
+    public void eliminar(Long id) {
+        Usuario usuario = buscar(id);
+
+        if (!RolId.USUARIO_FINAL.equals(usuario.getRolId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo las cuentas de usuario final se pueden eliminar");
+        }
+        if (compromisoClient.tieneCuotasPorPagar(usuario.getRut())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "No puedes eliminar tu cuenta mientras tengas cuotas por pagar");
+        }
+
+        usuarioRepository.delete(usuario);
+    }
+
     private Usuario buscar(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));

@@ -19,8 +19,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ClientesTest {
 
@@ -87,6 +89,58 @@ class ClientesTest {
 
         assertEquals(HttpMethod.PUT, peticiones.get(0).method());
         assertEquals("/api/compromisos/titular/15.834.207-3", peticiones.get(0).url().getPath());
+    }
+
+    @Test
+    void tieneCuotasPorPagar_conUnaCuotaVencida_devuelveVerdadero() {
+        String json = "[{\"folio\":\"CP-0101\",\"estado\":\"PAGADO\",\"monto\":15000},"
+                + "{\"folio\":\"CP-0102\",\"estado\":\"VENCIDO\",\"monto\":15000}]";
+        CompromisoClient cliente = new CompromisoClient(servidorQueResponde(HttpStatus.OK, json),
+                "http://compromisos-service");
+
+        assertTrue(cliente.tieneCuotasPorPagar("15.834.207-3"));
+        assertEquals(HttpMethod.GET, peticiones.get(0).method());
+        assertEquals("/api/compromisos", peticiones.get(0).url().getPath());
+        assertEquals("rut=15.834.207-3", peticiones.get(0).url().getQuery());
+    }
+
+    @Test
+    void tieneCuotasPorPagar_conCuotasPagadasYAnuladas_devuelveFalso() {
+        String json = "[{\"folio\":\"CP-0101\",\"estado\":\"PAGADO\"},{\"folio\":\"CP-0111\",\"estado\":\"ANULADO\"}]";
+        CompromisoClient cliente = new CompromisoClient(servidorQueResponde(HttpStatus.OK, json),
+                "http://compromisos-service");
+
+        assertFalse(cliente.tieneCuotasPorPagar("15.834.207-3"));
+    }
+
+    @Test
+    void tieneCuotasPorPagar_sinCompromisos_devuelveFalso() {
+        CompromisoClient cliente = new CompromisoClient(servidorQueResponde(HttpStatus.OK, "[]"),
+                "http://compromisos-service");
+
+        assertFalse(cliente.tieneCuotasPorPagar("15.834.207-3"));
+    }
+
+    @Test
+    void tieneCuotasPorPagar_conServicioApagado_lanzaServicioNoDisponible() {
+        CompromisoClient cliente = new CompromisoClient(servidorApagado(), "http://compromisos-service");
+
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> cliente.tieneCuotasPorPagar("15.834.207-3"));
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, error.getStatusCode());
+        assertEquals("El servicio de compromisos no está disponible", error.getReason());
+    }
+
+    @Test
+    void tieneCuotasPorPagar_conServicioSinInstancias_lanzaServicioNoDisponible() {
+        CompromisoClient cliente = new CompromisoClient(servidorQueResponde(HttpStatus.SERVICE_UNAVAILABLE, "{}"),
+                "http://compromisos-service");
+
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> cliente.tieneCuotasPorPagar("15.834.207-3"));
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, error.getStatusCode());
     }
 
     @Test

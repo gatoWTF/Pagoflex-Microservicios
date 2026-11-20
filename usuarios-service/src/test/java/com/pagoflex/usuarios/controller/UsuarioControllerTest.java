@@ -85,4 +85,11 @@ class UsuarioControllerTest {
 
         verify(usuarioService).cambiarContrasena(1L, datos);
     }
+
+    @Test
+    void eliminar_llamaAlServicio() {
+        usuarioController.eliminar(1L);
+
+        verify(usuarioService).eliminar(1L);
+    }
 }

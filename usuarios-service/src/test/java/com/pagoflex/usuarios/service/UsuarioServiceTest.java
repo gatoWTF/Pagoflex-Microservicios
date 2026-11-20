@@ -422,4 +422,48 @@ class UsuarioServiceTest {
         verify(usuarioRepository).save(guardado.capture());
         assertEquals("nueva-encriptada", guardado.getValue().getContrasena());
     }
+
+    @Test
+    void eliminar_conCuentaInexistente_lanzaNoEncontrado() {
+        when(usuarioRepository.findById(9L)).thenReturn(Optional.empty());
+
+        ResponseStatusException error = esperarError(() -> usuarioService.eliminar(9L));
+
+        assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
+    }
+
+    @Test
+    void eliminar_cuentaDeEjecutivo_lanzaProhibido() {
+        Usuario ejecutiva = camila();
+        ejecutiva.setRolId(RolId.EJECUTIVO);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(ejecutiva));
+
+        ResponseStatusException error = esperarError(() -> usuarioService.eliminar(1L));
+
+        assertEquals(HttpStatus.FORBIDDEN, error.getStatusCode());
+        verify(usuarioRepository, never()).delete(any(Usuario.class));
+    }
+
+    @Test
+    void eliminar_conCuotasPorPagar_lanzaConflicto() {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(camila()));
+        when(compromisoClient.tieneCuotasPorPagar("15.834.207-3")).thenReturn(true);
+
+        ResponseStatusException error = esperarError(() -> usuarioService.eliminar(1L));
+
+        assertEquals(HttpStatus.CONFLICT, error.getStatusCode());
+        assertEquals("No puedes eliminar tu cuenta mientras tengas cuotas por pagar", error.getReason());
+        verify(usuarioRepository, never()).delete(any(Usuario.class));
+    }
+
+    @Test
+    void eliminar_sinCuotasPorPagar_borraLaCuenta() {
+        Usuario cuenta = camila();
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(cuenta));
+        when(compromisoClient.tieneCuotasPorPagar("15.834.207-3")).thenReturn(false);
+
+        usuarioService.eliminar(1L);
+
+        verify(usuarioRepository).delete(cuenta);
+    }
 }

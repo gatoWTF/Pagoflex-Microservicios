@@ -9,7 +9,7 @@ La app Android (Kotlin + Jetpack Compose) está en otro repositorio: [gatoWTF/Pa
 | `eureka-server` | 8761 | — | Registro y descubrimiento: cada servicio se anota al arrancar. Panel en `http://localhost:8761` |
 | `api-gateway` | 8080 | — | Puerta de entrada de la app. Envía `/api/usuarios/**` a usuarios, `/api/roles/**` a roles y `/api/compromisos/**`, `/api/comprobantes/**`, `/api/reportes/**` a compromisos, buscando cada servicio en Eureka |
 | `roles-service` | 8081 | `pagoflex_roles` | Catálogo de roles |
-| `usuarios-service` | 8082 | `pagoflex_usuarios` | Registro, login, perfil y cambio de contraseña (BCrypt). Le pide el nombre del rol a `roles-service` con WebClient (por su nombre en Eureka) |
+| `usuarios-service` | 8082 | `pagoflex_usuarios` | Registro, login, perfil, cambio de contraseña (BCrypt) y eliminar cuenta. Le pide el nombre del rol a `roles-service` con WebClient (por su nombre en Eureka) |
 | `compromisos-service` | 8083 | `pagoflex_compromisos` | Compromisos de pago, comprobantes y reportes de problemas. Cada compromiso guarda el RUT de su dueño (el mismo de su cuenta) |
 
 ## Cómo levantarlos
@@ -48,6 +48,7 @@ Endpoints: `GET /api/roles` y `GET /api/roles/{id}` (404 si no existe).
 | PUT | `/api/usuarios/{id}` | `{"nombre","rut","correo"}` | 200 · 400 nombre con números, correo sin formato o RUT distinto al de la cuenta (el RUT no se cambia) · 404 · 409 correo de otra cuenta |
 | PUT | `/api/usuarios/{id}/contacto` | `{"correoSecundario","telefono"}` (ambos opcionales; vacío = borrar) | 200 usuario · 400 correo o teléfono no válido · 404 |
 | PUT | `/api/usuarios/{id}/contrasena` | `{"actual","nueva"}` | 204 · 401 clave actual incorrecta · 400 |
+| DELETE | `/api/usuarios/{id}` | — | 204 · 403 cuenta de ejecutivo o agente · 404 · 409 tiene cuotas pendientes, vencidas o en revisión · 503 compromisos-service apagado |
 
 ## compromisos-service — `http://localhost:8083`
 
