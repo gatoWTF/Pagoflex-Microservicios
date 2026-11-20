@@ -4,6 +4,8 @@ import com.pagoflex.compromisos.dto.GestionReporteRequest;
 import com.pagoflex.compromisos.dto.NuevoReporteRequest;
 import com.pagoflex.compromisos.dto.ReporteResponse;
 import com.pagoflex.compromisos.service.ReporteService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,27 +23,32 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/reportes")
 @RequiredArgsConstructor
+@Tag(name = "Reportes", description = "Reportes de problemas y su gestión por los agentes")
 public class ReporteController {
 
     private final ReporteService reporteService;
 
     @GetMapping
+    @Operation(summary = "Lista los reportes (todos, o solo los de un RUT)")
     public List<ReporteResponse> listar(@RequestParam(required = false) String rut) {
         return reporteService.listar(rut);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Crea un reporte y deja el compromiso en revisión")
     public ReporteResponse crear(@RequestBody NuevoReporteRequest datos) {
         return reporteService.crear(datos);
     }
 
     @PutMapping("/{numero}/tomar")
+    @Operation(summary = "Un agente toma un reporte abierto")
     public ReporteResponse tomar(@PathVariable String numero, @RequestBody GestionReporteRequest datos) {
         return reporteService.tomar(numero, datos);
     }
 
     @PutMapping("/{numero}/resolver")
+    @Operation(summary = "El agente responsable resuelve el reporte")
     public ReporteResponse resolver(@PathVariable String numero, @RequestBody GestionReporteRequest datos) {
         return reporteService.resolver(numero, datos);
     }
